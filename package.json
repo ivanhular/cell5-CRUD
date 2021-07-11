@@ -6,7 +6,7 @@
     "server": "env-cmd -f ./backend/config/dev.env nodemon ./backend/server.js",
     "client": "npm start --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "test": "env-cmd -f ./backend/config/test.env jest --watchAll --runInBand"
+    "test": "env-cmd -f ./backend/config/test.env jest --watchAll --testPathPattern=backend/tests --runInBand"
   },
   "keywords": [],
   "author": "",

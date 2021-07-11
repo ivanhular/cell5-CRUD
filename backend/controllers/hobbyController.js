@@ -5,6 +5,7 @@ const Hobby = require('../models/hobbyModel.js')
 // @desc    list all hobby
 // @route   GET /api/hobbies
 // @access  Public
+// @params  sort
 const listHobby = asyncHandler(async (req, res) => {
   const keyword = req.query.keyword
     ? {
@@ -17,18 +18,12 @@ const listHobby = asyncHandler(async (req, res) => {
   const hobbies = await Hobby.find({
     ...keyword,
   })
-  console.log('sort', req.query.sortByTitle)
 
   if (req.query.sort === 'title') {
     return res.send({
       data: hobbies.sort((a, b) => {
-        if (a.title.toLowerCase() < b.title.toLowerCase()) {
-          return -1
-        } else if (a.title.toLowerCase() > b.title.toLowerCase()) {
-          return 1
-        } else {
-          return 0
-        }
+        if (a.title.toLowerCase() === b.title.toLowerCase()) return 0
+        return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1
       }),
     })
   }
@@ -36,13 +31,11 @@ const listHobby = asyncHandler(async (req, res) => {
   if (req.query.sort === 'description') {
     return res.send({
       data: hobbies.sort((a, b) => {
-        if (a.description.toLowerCase() < b.description.toLowerCase()) {
-          return -1
-        } else if (a.description.toLowerCase() > b.description.toLowerCase()) {
-          return 1
-        } else {
+        if (a.description.toLowerCase() === b.description.toLowerCase())
           return 0
-        }
+        return a.description.toLowerCase() < b.description.toLowerCase()
+          ? -1
+          : 1
       }),
     })
   }
@@ -71,6 +64,7 @@ const createHobby = asyncHandler(async (req, res) => {
 // @desc    update a hobby
 // @route   PATCH /api/hobbies
 // @access  Public
+// @params  id
 const updateHobby = asyncHandler(async (req, res) => {
   const hobby = await Hobby.findById(req.params.id)
   const allowedUpdates = Object.keys(Hobby.schema.paths)
@@ -81,8 +75,6 @@ const updateHobby = asyncHandler(async (req, res) => {
   const filterInvalidUpdate = updates.filter(
     (key) => !allowedUpdates.includes(key)
   )
-
-  console.log(filterInvalidUpdate.join(', '))
 
   if (!hobby) {
     throw new Error('No Hobby found')
@@ -106,12 +98,17 @@ const updateHobby = asyncHandler(async (req, res) => {
 // @desc    delete a hobby
 // @route   DELETE /api/hobbies
 // @access  Public
+// @params  id
 const deleteHobby = asyncHandler(async (req, res) => {
   const hobby = await Hobby.findByIdAndDelete(req.params.id)
 
   res.send({ data: hobby })
 })
 
+// @desc    Hobby Description from Wiki
+// @route   GET /api/hobbies/wiki?search=test
+// @access  Public
+// @params  search
 const queryWiki = asyncHandler(async (req, res) => {
   const { data } = await axios.get(
     `https://en.wikipedia.org/w/api.php?action=query&titles=${req.query.search}&prop=extracts&exintro=1&format=json`
@@ -124,7 +121,7 @@ const queryWiki = asyncHandler(async (req, res) => {
     throw new Error('No result Found!')
   }
 
-  console.log(data.query.pages[Object.keys(data.query.pages)[0]]?.extract)
+  // console.log(data.query.pages[Object.keys(data.query.pages)[0]]?.extract)
 })
 
 module.exports = { createHobby, listHobby, updateHobby, deleteHobby, queryWiki }

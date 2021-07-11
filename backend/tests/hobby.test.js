@@ -8,9 +8,6 @@ beforeEach(setUpDatabase, 20000)
 test('should list hobbies', async () => {
   const response = await request(app).get('/api/hobbies').expect(200)
   const hobbies = await Hobby.find({})
-  //   console.log(response.body.data)
-  //   console.log(hobbies)
-  // expect(task).not.toBeNull()
   expect(response.body.data.length).toEqual(hobbies.length)
 })
 
